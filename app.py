@@ -1,3 +1,5 @@
+# Import Dependencies
+
 import warnings
 warnings.filterwarnings('ignore')
 import numpy as np
@@ -8,17 +10,28 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy import func
 
+# Create an engine for the sqlite database
+
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
+
+# Reflect Database into classes
 
 Base = automap_base()
 Base.prepare(engine, reflect=True)
 Base.classes.keys()
 
+# Save a reference to the table
+
 measurement = Base.classes.measurement
 station = Base.classes.station
 
+# Create a database session object
+
+session = Session(engine)
+
 app = Flask(__name__)
 
+# Create routes and list all routes available
 
 @app.route("/")
 def home():
@@ -31,6 +44,7 @@ def home():
         f"/api/v1.0/start/end<br/>"
     )
 
+#   * Convert the query results to a dictionary using `date` as the key and `prcp` as the value.
 
 
 @app.route("/api/vi.0/precipitation")
@@ -51,9 +65,12 @@ def precipitation():
 
         all_precip.append(precip_dict)
 
+ # * Return the JSON representation of your dictionary.
+
+
     return jsonify(all_precip)
 
-
+#Create json of stations from dataset
 
 @app.route("/api/v1.0/stations")
 def stations():
@@ -68,6 +85,8 @@ def stations():
 
     return jsonify(all_stations)
 
+#  * Query the dates and temperature observations of the most active station for the last year of data.
+#  * Return a JSON list of temperature observations (TOBS) for the previous year.
 
 @app.route("/api/v1.0/tobs")
 def temperatures():
@@ -89,6 +108,11 @@ def temperatures():
         all_temps.append(temp_dict)
 
     return jsonify(all_temps)
+
+#  * Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
+#   * Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
+# * When given the start and the end date, calculate the `TMIN`, `TAVG`, and `TMAX` for dates between the start and end date inclusive
+
 
 @app.route("/api/v1.0/<start>")
 def start(start_date):
