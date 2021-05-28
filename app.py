@@ -1,7 +1,5 @@
 # Import Dependencies
 
-import warnings
-warnings.filterwarnings('ignore')
 import numpy as np
 import sqlalchemy
 from flask import Flask, jsonify
@@ -9,6 +7,8 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy import func
+import datetime as dt
+import pandas as pd
 
 # Create an engine for the sqlite database
 
@@ -39,10 +39,10 @@ def home():
     return (
         f"Available Routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/start<br/>"
-        f"/api/v1.0/start/end<br/>"
-    )
+        f"/api/v1.0/start_date(yyyy-mm-dd)<br/>"
+        f"/api/v1.0/start_date(yyyy-mm-dd)/end_date(yyyy-mm-dd)<br/>")
 
 #   * Convert the query results to a dictionary using `date` as the key and `prcp` as the value.
 
@@ -114,9 +114,11 @@ def temperatures():
 # * When given the start and the end date, calculate the `TMIN`, `TAVG`, and `TMAX` for dates between the start and end date inclusive
 
 
-@app.route("/api/v1.0/<start>")
-def start(start_date):
+@app.route("/api/v1.0/<start_date>")
+def Start_date(start_date):
     session = Session(engine)
+
+    start_date = dt.datetime.strptime('2016-08-23', '%Y-%m-%d').date()
 
     st_date = session.query(func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).\
                 filter(measurement.date >= start_date).all()
@@ -134,9 +136,12 @@ def start(start_date):
     return jsonify(start_temp)
 
 
-@app.route("/api/v1.0/<start>")
+@app.route("/api/v1.0/<start_date>/<end_date>")
 def start_end(start_date, end_date):
     session = Session(engine)
+
+    start_date = dt.datetime.strptime('2016-08-23', '%Y-%m-%d').date()                      
+    end_date = dt.datetime.strptime('2017-08-23', '%Y-%m-%d').date()
 
 
     st_end_date = session.query(func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).\
